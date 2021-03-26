@@ -122,8 +122,33 @@ router.post('/login', function (req, res) {
 })
 
 router.get("/profile", passport.authenticate('jwt', {session: false}), (req, res) => {
-  return res.json({
-    user: req.user
+  User.findOne({
+    username: req.user.username
+  }).then(user => {
+    if(!user) {
+      return res.status(404).json({
+        msg: "User is not found.",
+        success: false
+      })
+    }else{
+      let profile = user
+      Wallet.findOne({
+        username: req.user.username
+      }).then(wallet => {
+        if(wallet) {
+          let walletProfile = wallet
+          return res.status(201).json({
+            user: req.user,
+            wallet: walletProfile
+          })
+        }else{
+          return res.status(404).json({
+            msg: "Wallet is not found. Contact to support.",
+            success: false
+          })
+        }
+      })
+    }
   })
 })
 

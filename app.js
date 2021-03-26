@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var logger = require('morgan');
 var cors = require('cors')
+const passport = require('passport')
 
 var indexRouter = require('./routes/index');
 
@@ -20,6 +21,8 @@ app.use(bodyParser.urlencoded({
   extended: false
 }))
 app.use(bodyParser.json())
+app.use(passport.initialize())
+require('./config/passport')(passport)
 
 // Bring in the Database Config
 const db = require('./config/keys').mongoURI

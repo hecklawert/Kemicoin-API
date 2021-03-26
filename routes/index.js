@@ -4,7 +4,9 @@ var bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const passport = require('passport')
 const User = require('../model/User')
-const key = require('../config/keys').secret
+const Wallet = require('../model/Wallet')
+const key = require('../config/keys').secret;
+let seeds = require('../config/seed');
 
 router.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
@@ -49,26 +51,34 @@ router.post('/register', function(req, res) {
         })
       }
     })
-    // The data is valid and now we can register the user
+    // The data is valid and now we can register the user...
     let newUser = new User({
       name,
       username,
       password,
       email
     })
+    // ... and the wallet
+    let newWallet = new Wallet({
+      username,
+      seed: seeds.generateNewSeed()
+    })
     // Hash the password
     bcrypt.genSalt(10, (err, salt) => {
       bcrypt.hash(newUser.password, salt, (err, hash) => {
         if(err) throw err
         newUser.password = hash
-        newUser.save().then(user => {
-          return res.status(201).json({
-            success: true,
-            msg: "User registered!"
-          })
-        })
       })
     })
+    //Store the seed
+    newWallet.save().then(wallet => {
+      newUser.save().then(user => {
+        return res.status(201).json({
+          success: true,
+          msg: "User registered!"
+        })
+      })
+    }) 
   })
 })
 
@@ -108,6 +118,12 @@ router.post('/login', function (req, res) {
         })        
       }
     })
+  })
+})
+
+router.get("/profile", passport.authenticate('jwt', {session: false}), (req, res) => {
+  return res.json({
+    user: req.user
   })
 })
 

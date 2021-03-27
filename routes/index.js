@@ -6,7 +6,8 @@ const passport = require('passport')
 const User = require('../model/User')
 const Wallet = require('../model/Wallet')
 const key = require('../config/keys').secret;
-let seeds = require('../config/seed');
+let seeds = require('../config/seed')
+const UserActions = require('../actions/UsersActions')
 
 router.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
@@ -20,65 +21,10 @@ router.use(function(req, res, next) {
 // });
 
 router.post('/register', function(req, res) {
-  let {
-    name,
-    username,
-    email,
-    password,
-    confirm_password
-  } = req.body
-  if (password !== confirm_password) {
-    return res.status(400).json({
-      msg: "Password do not match."
+  UserActions.createNewUser(req.body).then( result => {
+    return res.status(result.status).json({
+      msg: result.msg
     })
-  }
-  // Check for the unique Username
-  User.findOne({
-    username: username
-  }).then(user => {
-    if(user){
-      return res.status(400).json({
-        msg: "Username is already taken"
-      })
-    }
-    // Check for the unique Email
-    User.findOne({
-      email: email
-    }).then(user => {
-      if(user) {
-        return res.status(400).json({
-          msg: "Email already taken. Did you forget your password?"
-        })
-      }
-    })
-    // The data is valid and now we can register the user...
-    let newUser = new User({
-      name,
-      username,
-      password,
-      email
-    })
-    // ... and the wallet
-    let newWallet = new Wallet({
-      username,
-      seed: seeds.generateNewSeed()
-    })
-    // Hash the password
-    bcrypt.genSalt(10, (err, salt) => {
-      bcrypt.hash(newUser.password, salt, (err, hash) => {
-        if(err) throw err
-        newUser.password = hash
-      })
-    })
-    //Store the seed
-    newWallet.save().then(wallet => {
-      newUser.save().then(user => {
-        return res.status(201).json({
-          success: true,
-          msg: "User registered!"
-        })
-      })
-    }) 
   })
 })
 

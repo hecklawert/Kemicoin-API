@@ -173,7 +173,7 @@ async function loginUser(req){
         response = {
           success: true,
           status: 201,
-          token: _generateJwtToken(userChecked),
+          token: "Bearer "+_generateJwtToken(userChecked),
           msg: "You're logged in."
         }
       }
@@ -208,10 +208,14 @@ function _generateJwtToken(_payload){
 // =================================================================
 
 async function getProfile(request) {
-  let userChecked
+  let userChecked 
+
+  if(userChecked){
+    console.log("no deberia verse")
+  }
 
   // Check if the user is registered.
-  await _checkUsernameUsed(req.body.username).then(user => {
+  await _checkUsernameUsed(request.user.username).then(user => {
     if(user){
       userChecked = {
         _id: user._id,
@@ -220,7 +224,6 @@ async function getProfile(request) {
         password: user.password,
         email: user.email,
         date: user.date,
-        seed
       }
     }
   })
@@ -231,9 +234,19 @@ async function getProfile(request) {
       userChecked.seed = wallet.seed
     })
   }
-  
-  return userChecked
 
+  if(userChecked) {
+    return{
+      success: true,
+      status: 200,
+      user: userChecked
+    }
+  }else{
+    return{
+      success: false,
+      status: 400,
+    }
+  }
 }
 
 async function _findUserWallet(username){
@@ -244,6 +257,7 @@ async function _findUserWallet(username){
       resolve(walletState)
     })    
   })
+
   return walletPromise
 }
 

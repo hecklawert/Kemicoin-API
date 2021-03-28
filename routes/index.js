@@ -1,12 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
 const passport = require('passport')
-const User = require('../model/User')
-const Wallet = require('../model/Wallet')
-const key = require('../config/keys').secret;
-let seeds = require('../config/seed')
 const UserActions = require('../actions/UsersActions')
 
 router.use(function(req, res, next) {

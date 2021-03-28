@@ -31,6 +31,7 @@ async function createNewUser(request){
     }
   }
 
+  // Check if the username or the email is in DB
   if(await _checkUsernameUsed(username)){
     return {
       success: false,
@@ -122,4 +123,62 @@ async function _hashData(data){
   return hashedPassword
 }
 
-module.exports.createNewUser = createNewUser;
+/**
+ *  @desc Check if password is correct
+ *  @access Private 
+ *  @returns boolean
+ */
+ async function _checksPassword(_password1, _password2){
+  const match = await bcrypt.compare(_password1, _password2);
+  if(match) return true
+  return false
+}
+
+
+// =================================================================
+//                       /login functions
+// =================================================================
+
+async function loginUser(req){
+  
+  // By default the response is gonna be 404
+  let userChecked
+  let response = {
+    success: false,
+    status: 404,
+    msg: "Login incorrect."
+  }
+
+  // Check if the username is in DB
+  await _checkUsernameUsed(req.body.username).then(user => {
+    if(user){
+      console.log("deberia definirse userChecked")
+      userChecked = {
+        username: user.username,
+        password: user.password
+      }
+    }
+  })
+
+  // Checks the password if the user exists, if password is correct will return 201.
+  if(userChecked){
+    await _checksPassword(req.body.password, userChecked.password).then(isMatch => {
+      if(isMatch){
+        response = {
+          success: true,
+          status: 201,
+          msg: "You're logged in."
+        }
+      }
+    })
+  }
+
+  return response
+
+}
+
+
+module.exports = {
+  createNewUser,
+  loginUser
+} 

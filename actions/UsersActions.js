@@ -173,7 +173,7 @@ async function loginUser(req){
         response = {
           success: true,
           status: 201,
-          token: generateJwtToken(userChecked),
+          token: _generateJwtToken(userChecked),
           msg: "You're logged in."
         }
       }
@@ -190,7 +190,7 @@ async function loginUser(req){
  *  @access Private 
  *  @returns string
  */
-function generateJwtToken(_payload){
+function _generateJwtToken(_payload){
   const JwtSigned = jwt.sign(_payload, key, {
     expiresIn: 604800
   }) 
@@ -198,7 +198,54 @@ function generateJwtToken(_payload){
 }
 
 
+// =================================================================
+//                       /profile functions
+// =================================================================
+
+async function getProfile(request) {
+  let userChecked
+
+  // Check if the user is registered.
+  await _checkUsernameUsed(req.body.username).then(user => {
+    if(user){
+      userChecked = {
+        _id: user._id,
+        name: user.name,
+        username: user.username,
+        password: user.password,
+        email: user.email,
+        date: user.date,
+        seed
+      }
+    }
+  })
+
+  // If user is registered, recover the wallet.
+  if(userChecked){
+    await _findUserWallet(userChecked.username).then(wallet => {
+      userChecked.seed = wallet.seed
+    })
+  }
+  
+  return userChecked
+
+}
+
+async function _findUserWallet(username){
+  const walletPromise = await new Promise((resolve, reject) => {
+    Wallet.findOne({
+      username: username
+    }).then(walletState => {
+      resolve(walletState)
+    })    
+  })
+  return walletPromise
+}
+
+
+
 module.exports = {
   createNewUser,
-  loginUser
+  loginUser,
+  getProfile
 } 

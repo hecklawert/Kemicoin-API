@@ -188,7 +188,7 @@ async function loginUser(req){
 /**
  *  @desc Generate JWT Token from Payload 
  *  @access Private 
- *  @returns boolean
+ *  @returns string
  */
 function generateJwtToken(_payload){
   const JwtSigned = jwt.sign(_payload, key, {

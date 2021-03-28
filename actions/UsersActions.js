@@ -2,6 +2,8 @@ var bcrypt = require('bcryptjs')
 const User = require('../model/User')
 const Wallet = require('../model/Wallet')
 let seeds = require('../config/seed');
+const jwt = require('jsonwebtoken')
+const key = require('../config/keys').secret;
 
 // =================================================================
 //                       /register functions
@@ -141,40 +143,58 @@ async function _hashData(data){
 
 async function loginUser(req){
   
-  // By default the response is gonna be 404
+  // By default the response is gonna be 404.
   let userChecked
   let response = {
     success: false,
     status: 404,
+    token: {},
     msg: "Login incorrect."
   }
 
-  // Check if the username is in DB
+  // Check if the username is in DB.
   await _checkUsernameUsed(req.body.username).then(user => {
     if(user){
-      console.log("deberia definirse userChecked")
       userChecked = {
+        _id: user._id,
+        name: user.name,
         username: user.username,
-        password: user.password
+        password: user.password,
+        email: user.email
       }
     }
   })
 
-  // Checks the password if the user exists, if password is correct will return 201.
+  // Checks the password if the user exists.
   if(userChecked){
     await _checksPassword(req.body.password, userChecked.password).then(isMatch => {
       if(isMatch){
+        //User's password is correct and we need to send the JSON Token for that user
         response = {
           success: true,
           status: 201,
+          token: generateJwtToken(userChecked),
           msg: "You're logged in."
         }
       }
+
     })
   }
 
   return response
 
+}
+
+/**
+ *  @desc Generate JWT Token from Payload 
+ *  @access Private 
+ *  @returns boolean
+ */
+function generateJwtToken(_payload){
+  const JwtSigned = jwt.sign(_payload, key, {
+    expiresIn: 604800
+  }) 
+  return JwtSigned
 }
 
 

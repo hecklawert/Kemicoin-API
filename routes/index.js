@@ -31,7 +31,9 @@ router.post('/register', function(req, res) {
 router.post('/login', function (req, res) {
   UserActions.loginUser(req).then( result => {
     return res.status(result.status).json({
-      msg: result.msg
+      status: result.status,
+      msg: result.msg,
+      token: result.token
     })
   })  
 })

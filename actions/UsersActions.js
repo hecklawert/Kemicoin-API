@@ -191,7 +191,12 @@ async function loginUser(req){
  *  @returns string
  */
 function _generateJwtToken(_payload){
-  const JwtSigned = jwt.sign(_payload, key, {
+  let payload = {
+    _id: _payload._id,
+    username: _payload.username,
+    email: _payload.email
+  }
+  const JwtSigned = jwt.sign(payload, key, {
     expiresIn: 604800
   }) 
   return JwtSigned

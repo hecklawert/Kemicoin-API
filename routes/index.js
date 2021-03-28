@@ -98,7 +98,7 @@ router.post('/login', function (req, res) {
         //User's password is correct and we need to send the JSON Token for that user
         const payload = {
           _id: user.id,
-          username: user.name,
+          username: user.username,
           name: user.name,
           email: user.email
         }

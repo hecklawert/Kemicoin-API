@@ -16,7 +16,7 @@ jobs:
       - run: echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV         
 
       - name: Push to GitHub Packages
-        uses: docker/build-push-action@v1
+        uses: docker/build-push-action@v2
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}

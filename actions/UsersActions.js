@@ -141,6 +141,11 @@ async function _hashData(data){
 //                       /login functions
 // =================================================================
 
+/**
+ *  @desc Logs user
+ *  @access Public 
+ */
+
 async function loginUser(req){
   
   // By default the response is gonna be 404.
@@ -207,12 +212,13 @@ function _generateJwtToken(_payload){
 //                       /profile functions
 // =================================================================
 
+/**
+ *  @desc Get the entire profile of an user
+ *  @access Public 
+ */
+
 async function getProfile(request) {
   let userChecked 
-
-  if(userChecked){
-    console.log("no deberia verse")
-  }
 
   // Check if the user is registered.
   await _checkUsernameUsed(request.user.username).then(user => {
@@ -249,6 +255,11 @@ async function getProfile(request) {
   }
 }
 
+/**
+ *  @desc Get the wallet of an user
+ *  @access Public 
+ */
+
 async function _findUserWallet(username){
   const walletPromise = await new Promise((resolve, reject) => {
     Wallet.findOne({
@@ -262,9 +273,40 @@ async function _findUserWallet(username){
 }
 
 
+// =================================================================
+//                       /getWallet functions
+// =================================================================
+
+/**
+ *  @desc Get the wallet seed of user
+ *  @access Public 
+ */
+
+ async function getWallet(request) {
+  let seed
+  // If user is registered, recover the wallet.
+  await _findUserWallet(request.user.username).then(wallet => {
+    seed = wallet.seed
+  })
+
+  if(seed){
+    return {
+      success: true,
+      status: 201,
+      seed
+    }
+  }else{
+    return {
+      success: true,
+      status: 404,
+      msg: "Wallet not found"
+    }
+  }
+}
 
 module.exports = {
   createNewUser,
   loginUser,
-  getProfile
+  getProfile,
+  getWallet
 } 

@@ -40,4 +40,12 @@ router.get("/profile", passport.authenticate('jwt', {session: false}), (req, res
   })
 })
 
+router.get("/getWallet", passport.authenticate('jwt', {session: false}), (req, res) => {
+  UserActions.getWallet(req).then( result => {
+    return res.status(result.status).json({
+      result
+    })
+  })
+})
+
 module.exports = router;

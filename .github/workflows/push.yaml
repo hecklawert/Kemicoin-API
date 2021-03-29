@@ -1,0 +1,46 @@
+name: Build and push image
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@master
+
+      - run: echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV         
+
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: hecklawer/Kemicoin-API/kemicoin-api:{{ env.VERSION }}
+          tag_with_ref: false          
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: V${{ env.VERSION }}
+          body: |
+            This is an Alpha version.
+            Features:
+            - Register user
+            - Login user
+            - See user profile
+            - Get wallet seeds
+          draft: false
+          prerelease: false   

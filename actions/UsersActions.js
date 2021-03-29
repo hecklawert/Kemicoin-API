@@ -177,7 +177,7 @@ async function loginUser(req){
         //User's password is correct and we need to send the JSON Token for that user
         response = {
           success: true,
-          status: 201,
+          status: 200,
           token: "Bearer "+_generateJwtToken(userChecked),
           msg: "You're logged in."
         }
@@ -292,7 +292,7 @@ async function _findUserWallet(username){
   if(seed){
     return {
       success: true,
-      status: 201,
+      status: 200,
       seed
     }
   }else{

@@ -172,6 +172,11 @@ async function loginUser(req){
 
   // Checks the password if the user exists.
   if(userChecked){
+    // Get the user seed
+    await _findUserWallet(req.body.username).then(wallet => {
+      userChecked['seed'] = wallet.seed
+    })
+    // Check password and if is correct return the response
     await _checksPassword(req.body.password, userChecked.password).then(isMatch => {
       if(isMatch){
         //User's password is correct and we need to send the JSON Token for that user
@@ -179,7 +184,8 @@ async function loginUser(req){
           success: true,
           status: 200,
           token: "Bearer "+_generateJwtToken(userChecked),
-          msg: "You're logged in."
+          msg: "You're logged in.",
+          user: userChecked
         }
       }
 

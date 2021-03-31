@@ -36,6 +36,7 @@ mongoose.connect(db, {
 })
 
 // Router
+app.options('*', cors())
 app.use('/', indexRouter);
 
 // catch 404 and forward to error handler
@@ -51,6 +52,6 @@ app.use(function(err, req, res, next) {
 
 });
 
-app.options('*', cors())
+
 
 module.exports = app;

@@ -5,6 +5,7 @@ const UserActions = require('../actions/UsersActions')
 
 router.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
@@ -17,6 +18,7 @@ router.use(function(req, res, next) {
 router.post('/register', function(req, res) {
   UserActions.createNewUser(req.body).then( result => {
     return res.status(result.status).json({
+      success: result.success,
       msg: result.msg
     })
   })
@@ -25,9 +27,11 @@ router.post('/register', function(req, res) {
 router.post('/login', function (req, res) {
   UserActions.loginUser(req).then( result => {
     return res.status(result.status).json({
+      success: result.success,
       status: result.status,
       msg: result.msg,
-      token: result.token
+      token: result.token,
+      user: result.user
     })
   })  
 })

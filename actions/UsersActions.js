@@ -310,9 +310,65 @@ async function _findUserWallet(username){
   }
 }
 
+
+// =================================================================
+//                       /user/updateUser functions
+// =================================================================
+
+/**
+ *  @desc Update user profile
+ *  @access Public 
+ */
+
+ async function updateUser(request) {
+  // Get user data request
+  let user = {
+    _id : request.body.id,
+    name: request.body.name,
+    email: request.body.email
+  }
+
+  // Set parameters to the query
+  const filter = { _id:  user._id}
+  const options = { upsert: false }; // This prevent to insert new registry if user is not found
+
+  const updateDoc = {
+    $set: {
+      name: user.name,
+      email: user.email
+    },
+  };
+
+  // Update the user in DDBB
+  const query = await User.findByIdAndUpdate( user._id , updateDoc, (err, docs) => {
+    if(err){
+        console.log("Error updating DDBB")
+    }
+  });
+
+  if(query){
+    return {
+      success: true,
+      status: 201,
+      msg: "User updated!",
+      user: {
+        name: user.name,
+        email: user.email
+      }
+    }
+  }else{
+    return {
+      success: false,
+      status: 500,
+      msg: "Error updating DDBB"
+    }
+  }
+}
+
 module.exports = {
   createNewUser,
   loginUser,
   getProfile,
-  getWallet
+  getWallet,
+  updateUser
 } 

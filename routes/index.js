@@ -52,4 +52,12 @@ router.get("/getWallet", passport.authenticate('jwt', {session: false}), (req, r
   })
 })
 
+router.post("/user/updateUser", passport.authenticate('jwt', {session: false}), (req, res) => {
+  UserActions.updateUser(req).then( result => {
+    return res.status(result.status).json({
+      result
+    })
+  })
+})
+
 module.exports = router;

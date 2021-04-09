@@ -9,7 +9,6 @@ var cors = require('cors')
 const passport = require('passport')
 
 var indexRouter = require('./routes/index');
-var userRouter = require('./routes/user');
 
 var app = express();
 
@@ -39,7 +38,6 @@ mongoose.connect(db, {
 // Router
 app.options('*', cors())
 app.use('/', indexRouter);
-//app.use('/user', userRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

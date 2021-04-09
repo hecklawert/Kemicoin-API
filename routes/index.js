@@ -60,4 +60,12 @@ router.post("/user/updateUser", passport.authenticate('jwt', {session: false}), 
   })
 })
 
+router.post("/user/updatePassword", passport.authenticate('jwt', {session: false}), (req, res) => {
+  UserActions.updatePassword(req).then( result => {
+    return res.status(result.status).json({
+      result
+    })
+  })
+})
+
 module.exports = router;

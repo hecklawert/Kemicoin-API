@@ -340,7 +340,7 @@ async function _findUserWallet(username){
   };
 
   // Update the user in DDBB
-  const query = await User.findByIdAndUpdate( user._id , updateDoc, (err, docs) => {
+  const query = await User.findByIdAndUpdate( filter , updateDoc, (err, docs) => {
     if(err){
         console.log("Error updating DDBB")
     }
@@ -365,10 +365,67 @@ async function _findUserWallet(username){
   }
 }
 
+
+// =================================================================
+//                       /user/updatePassword functions
+// =================================================================
+
+/**
+ *  @desc Update user's password
+ *  @access Public 
+ */
+
+ async function updatePassword(request) {
+  // Check if password and confirmed password field matches
+  if(request.body.password != request.body.cpassword){
+    return {
+      success: false,
+      status: 500,
+      msg: "Passwords doesn't match"
+    }    
+  }
+
+  // Hash the password
+  let hashedPassword = await _hashData(request.body.password)
+
+  // Set parameters to the query
+  const filter = { _id:  request.body.id}
+  const options = { upsert: false }; // This prevent to insert new registry if user is not found
+
+  const updateDoc = {
+    $set: {
+      password: hashedPassword
+    },
+  };
+
+  // Update the password in DDBB
+  const query = await User.findByIdAndUpdate( filter , updateDoc, (err, docs) => {
+    if(err){
+        console.log("Error updating DDBB")
+    }
+  });  
+
+  if(query){
+    return {
+      success: true,
+      status: 201,
+      msg: "Password updated!",
+    }
+  }else{
+    return {
+      success: false,
+      status: 500,
+      msg: "Error updating DDBB"
+    }
+  }  
+
+}
+
 module.exports = {
   createNewUser,
   loginUser,
   getProfile,
   getWallet,
-  updateUser
+  updateUser,
+  updatePassword
 } 

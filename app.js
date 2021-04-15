@@ -1,5 +1,6 @@
 var createError = require('http-errors');
 const mongoose = require('mongoose')
+const fileUpload = require('express-fileupload');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -7,6 +8,7 @@ var bodyParser = require('body-parser');
 var logger = require('morgan');
 var cors = require('cors')
 const passport = require('passport')
+const scc = require('./config/config-service')
 
 var indexRouter = require('./routes/index');
 
@@ -23,16 +25,23 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json())
 app.use(passport.initialize())
 require('./config/passport')(passport)
+app.use(fileUpload({
+  createParentPath: true
+}));
 
-// Bring in the Database Config
-const db = require('./config/keys').mongoURI
-mongoose.connect(db, {
-  useNewUrlParser: true,
-  authSource: "admin"
-}).then(() => {
-  console.log(`Database connected succesfully ${db}`)
-}).catch(err => {
-  console.log(`Unable to connect with the database ${err}`)
+// Initialize configuration
+scc.setConfig('https://scc.hecklawert.es/backend-dev.json').then(() => {
+  // Bring in the Database Config
+  const db = require('./config/keys').getMongoUri()
+  mongoose.connect(db, {
+    useNewUrlParser: true,
+    authSource: "admin",
+    useUnifiedTopology: true
+  }).then(() => {
+    console.log(`Database connected succesfully ${db}`)
+  }).catch(err => {
+    console.log(`Unable to connect with the database ${err}`)
+  })
 })
 
 // Router

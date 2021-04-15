@@ -1,4 +1,7 @@
+const scc = require('../config/config-service')
+
 module.exports = {
-    mongoURI: "mongodb://root:kemicoin@localhost:27017/kemicoin", // If you are seeing this, yeah, I know... hardcoded credentials is not a good idea
-    secret: "mysecret"
+		getMongoUri: () => {return `mongodb://${scc.getConfig().mongodb[0].user}:${scc.getConfig().mongodb[0].password}@${scc.getConfig().mongodb[0].endpoint}:27017/${scc.getConfig().mongodb[0].database}`},
+    getS3Config: () => {return scc.getConfig().s3[0]},
+		secret: "mysecret",
 }

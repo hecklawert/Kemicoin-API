@@ -3,7 +3,9 @@ const User = require('../model/User')
 const Wallet = require('../model/Wallet')
 let seeds = require('../config/seed');
 const jwt = require('jsonwebtoken')
-const key = require('../config/keys').secret;
+const keys = require('../config/keys');
+var Minio = require('minio')
+
 
 // =================================================================
 //                       /register functions
@@ -165,7 +167,8 @@ async function loginUser(req){
         name: user.name,
         username: user.username,
         password: user.password,
-        email: user.email
+        email: user.email,
+        avatar: user.avatar || ''
       }
     }
   })
@@ -207,7 +210,7 @@ function _generateJwtToken(_payload){
     username: _payload.username,
     email: _payload.email
   }
-  const JwtSigned = jwt.sign(payload, key, {
+  const JwtSigned = jwt.sign(payload, keys.secret, {
     expiresIn: 604800
   }) 
   return JwtSigned
@@ -418,7 +421,86 @@ async function _findUserWallet(username){
       msg: "Error updating DDBB"
     }
   }  
+}
 
+// =================================================================
+//                       /user/updateAvatar functions
+// =================================================================
+
+/**
+ *  @desc Update user's avatar
+ *  @access Public 
+ */
+
+ async function updateAvatar(request) {
+  // Check if file is uploaded
+  if(!request.files && !request.body.id){
+    return {
+      success: false,
+      status: 500,
+      msg: "No file or user id"
+    } 
+  } 
+
+  // Set Minio Client
+  const minioClient = new Minio.Client({
+    endPoint: keys.getS3Config().endPoint,
+    port: keys.getS3Config().port,
+    useSSL: keys.getS3Config().useSSL,
+    accessKey: keys.getS3Config().accessKey,
+    secretKey: keys.getS3Config().secretKey
+  });  
+
+  // File that needs to be uploaded.
+  const buffer = request.files.avatar.data
+
+  // Create bucket if not exists
+  minioClient.makeBucket('avatars', 'us-east-1', function(err) {
+    if (err) return {
+      success: false,
+      status: 500,
+      msg: 'Error uploading avatar'
+    }
+  });
+
+  // Upload file
+  const fileName=request.body.iduser+'.jpg'
+  await minioClient.putObject('avatars', fileName, buffer, function(err, etag) {
+    if (err) console.log(err)
+  });
+    
+  // Update user registry with avatar path
+  // Set parameters to the query
+  const filter = { _id:  request.body.iduser}
+  const options = { upsert: true };
+
+  const updateDoc = {
+    $set: {
+      avatar: "avatars/"+fileName
+    },
+  };
+
+  // Update the avatar path in DDBB
+  const query = await User.findByIdAndUpdate( filter , updateDoc, options, (err, docs) => {
+    if(err){
+        console.log("Error updating DDBB")
+    }
+  });  
+  
+  if(query){
+    return {
+      success: true,
+      status: 201,
+      msg: "Password updated!",
+      avatar: "avatars/"+fileName
+    }
+  }else{
+    return {
+      success: false,
+      status: 500,
+      msg: "Error updating DDBB"
+    }
+  }  
 }
 
 module.exports = {
@@ -427,5 +509,6 @@ module.exports = {
   getProfile,
   getWallet,
   updateUser,
-  updatePassword
+  updatePassword,
+  updateAvatar
 } 

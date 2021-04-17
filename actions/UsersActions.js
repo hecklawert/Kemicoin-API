@@ -463,6 +463,14 @@ async function _findUserWallet(username){
     }
   });
 
+  minioClient.setBucketPolicy('avatars', JSON.stringify('download '), function(err) {
+    if (err) return {
+      success: false,
+      status: 500,
+      msg: 'Error uploading avatar'
+    }
+  })  
+
   // Upload file
   const fileName=request.body.iduser+'.jpg'
   await minioClient.putObject('avatars', fileName, buffer, function(err, etag) {

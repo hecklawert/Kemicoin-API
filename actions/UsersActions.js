@@ -444,7 +444,7 @@ async function _findUserWallet(username){
 
   // Set Minio Client
   const minioClient = new Minio.Client({
-    endPoint: keys.getS3Config().endPoint,
+    endPoint: keys.getS3Config().endpoint,
     port: keys.getS3Config().port,
     useSSL: keys.getS3Config().useSSL,
     accessKey: keys.getS3Config().accessKey,

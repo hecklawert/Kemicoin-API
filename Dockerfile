@@ -1,4 +1,4 @@
-FROM hub.docker.com/node:12
+FROM docker.io/node:12
 
 # Create app directory
 WORKDIR /usr/src/app
